@@ -1,7 +1,8 @@
 node_modules/
-<<<<<<< HEAD
 dist/
 
 yarn-error.log
-=======
->>>>>>> main
+
+pyenv/
+
+server/__pycache__

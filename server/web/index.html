@@ -1,0 +1,36 @@
+<script src="bundle.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.video-container {
+
+}
+
+.video-container {
+  width: 512px;
+  height: 512px;
+  overflow: hidden;
+}
+
+</style>
+<div class="video-container">
+  <video id="video">Video stream not available.</video>
+</div>
+<div class="flex flex-col m-8 w-96 margin-auto content-center">
+  <div class="flex flex-row">
+    <img id="img" width=512 src="/main_image"></img>
+    <canvas id="canvas"> </canvas>
+  </div>
+
+  <textarea
+    id="prompt"
+    class="my-4 block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+    placeholder="A cat in outer space."
+    rows="4"></textarea>
+
+  <button id="generate"
+    class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow">
+    generate
+  </button>
+</div>
+

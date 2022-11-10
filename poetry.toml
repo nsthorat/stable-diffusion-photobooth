@@ -1,0 +1,10 @@
+[virtualenvs]
+create = true
+in-project = true
+path = "{project-dir}/.venv"
+
+[experimental]
+# Opt-out of the new installer to fix apache-beam installation. See
+# https://github.com/python-poetry/poetry/issues/4888.
+# TODO(smilkov): Remove this when https://github.com/apache/beam/pull/23326 lands and is released.
+new-installer = false

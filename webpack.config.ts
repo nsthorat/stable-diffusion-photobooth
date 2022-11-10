@@ -64,7 +64,7 @@ export const WEBPACK_CONFIG: Configuration = {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
   entry: {
-    demo: './server/web/index.ts',
+    demo: './server/web/index.tsx',
   },
   output: {
     path: DIST_PATH,

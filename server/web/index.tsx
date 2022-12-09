@@ -2,83 +2,94 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { useAppDispatch, useAppSelector } from "./hooks";
-import { setMode, setPhotoModeIndex, setTimer, store } from "./store";
+import PROMPTS from "./prompts.json";
+import {
+  setGenerateModeIndex,
+  setMode,
+  setPhotoModeIndex,
+  setTimer,
+  store,
+} from "./store";
 
-const TIMER_LENGTH = 1;
+const TIMER_LENGTH = 5;
 const NUM_PHOTOS = 3;
+const NUM_AI_GENERATIONS = 8; //9;
+const REQUESTS_TIMEOUT = 20000; // ms
 
 const WEBCAM_WIDTH = 512;
-const WEBCAM_HEIGHT = 512;
-
-const PRINTER_DPI = 300;
-const PRINTER_WIDTH_INCHES = 4;
-const PRINTER_HEIGHT_INCHES = 6;
-const PRINTER_WIDTH_PX = 1200; // PRINTER_DPI * PRINTER_WIDTH_INCHES;
-const PRINTER_HEIGHT_PX = 1800; //PRINTER_DPI * PRINTER_HEIGHT_INCHES;
+const WEBCAM_HEIGHT = 0;
 
 export const App = React.memo(function App(): JSX.Element {
-  // let body: JSX.Element;
   const dispatch = useAppDispatch();
 
   const webcamVideo = React.useRef<HTMLVideoElement>(null);
+  const webcamStill = React.useRef<HTMLCanvasElement>(null);
   const realCanvases = Array(NUM_PHOTOS)
     .fill(0)
     .map(() => React.useRef<HTMLCanvasElement>(null));
-  const aiCanvases = Array(NUM_PHOTOS)
+  const aiColumnImages = Array(NUM_PHOTOS)
     .fill(0)
-    .map(() => React.useRef<HTMLCanvasElement>(null));
+    .map(() => React.useRef<HTMLImageElement>(null));
+  const aiCandidateGenerations = Array(NUM_AI_GENERATIONS)
+    .fill(0)
+    .map(() => React.useRef<HTMLImageElement>(null));
+  const aiCandidateSpinners = Array(NUM_AI_GENERATIONS)
+    .fill(0)
+    .map(() => React.useRef<HTMLDivElement>(null));
+  const aiModeRealMainCanvas = React.useRef<HTMLCanvasElement>(null);
+  const promptRef = React.useRef<HTMLTextAreaElement>(null);
+  const collectImagesRef = React.useRef<HTMLInputElement>(null);
 
-  console.log(webcamVideo);
+  // Local state
+  const [requestsPending, setRequestsPending] = React.useState(0);
+  const [showCandidateImages, setShowCandidateImages] = React.useState(false);
+  const prompts = Array(NUM_PHOTOS)
+    .fill(0)
+    .map(() => React.useState<string>("your prompt"));
+
+  // Setup the webcam.
   React.useEffect(() => {
-    console.log(webcamVideo.current);
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: false })
-      .then((stream) => {
-        webcamVideo.current.srcObject = stream;
-        webcamVideo.current.play();
-        dispatch(setMode("IDLE"));
-      })
-      .catch((err) => {
-        console.error(`An error occurred: ${err}`);
-      });
+    try {
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: false })
+        .then((stream) => {
+          webcamVideo.current.srcObject = stream;
+          webcamVideo.current.play();
+          webcamVideo.current.addEventListener(
+            "loadeddata",
+            () => {
+              dispatch(setMode("IDLE"));
+            },
+            false
+          );
+        })
+        .catch((err) => {
+          console.error(`An error occurred: ${err}`);
+        });
+    } catch (e) {
+      console.log(
+        `Try adding ${location.host} to:`,
+        "chrome://flags/#unsafely-treat-insecure-origin-as-secure"
+      );
+    }
   }, []);
 
   const mode = useAppSelector((state) => state.app.mode);
   const timer = useAppSelector((state) => state.app.timer);
   const photoModeIndex = useAppSelector((state) => state.app.photoModeIndex);
+  const generateModeIndex = useAppSelector(
+    (state) => state.app.generateModeIndex
+  );
 
   const start = () => {
     dispatch(setMode("PHOTO"));
     dispatch(setTimer(TIMER_LENGTH));
   };
 
-  if (timer > 0) {
+  if (mode === "PHOTO") {
     setTimeout(() => {
-      const nextTimer = timer - 1;
-      if (nextTimer === 0) {
-        const width = webcamVideo.current.videoWidth;
-        const height = webcamVideo.current.videoHeight;
-        // Capture!
-        const canvasRef = realCanvases[photoModeIndex];
-
-        console.log(canvasRef.current, photoModeIndex);
-        {
-          const context = canvasRef.current.getContext("2d");
-
-          canvasRef.current.width = width;
-          canvasRef.current.height = height;
-          context.drawImage(webcamVideo.current, 0, 0, width, height);
-        }
-
-        // remove
-        const aiCanvasRef = aiCanvases[photoModeIndex];
-        {
-          const context = aiCanvasRef.current.getContext("2d");
-          aiCanvasRef.current.width = width;
-          aiCanvasRef.current.height = height;
-          context.drawImage(webcamVideo.current, 0, 0, width, height);
-        }
-
+      if (timer === 0) {
+        console.log(photoModeIndex);
         const nextPhotoModeIndex = photoModeIndex + 1;
         if (nextPhotoModeIndex === NUM_PHOTOS) {
           dispatch(setMode("GENERATE"));
@@ -87,55 +98,352 @@ export const App = React.memo(function App(): JSX.Element {
           dispatch(setTimer(TIMER_LENGTH));
         }
       } else {
-        dispatch(setTimer(nextTimer));
+        dispatch(setTimer(timer - 1));
       }
     }, 1000);
+    if (timer === 0) {
+      const width = webcamVideo.current.videoWidth;
+      const height = webcamVideo.current.videoHeight;
+      // Capture!
+      const canvasRef = realCanvases[photoModeIndex];
+      const context = canvasRef.current.getContext("2d");
+      canvasRef.current.width = width;
+      canvasRef.current.height = height;
+      context.drawImage(webcamVideo.current, 0, 0, width, height);
+
+      const webcamStillContext = webcamStill.current.getContext("2d");
+      webcamStill.current.style.width = webcamVideo.current.offsetWidth + "px";
+      webcamStill.current.style.height =
+        webcamVideo.current.offsetHeight + "px";
+      webcamStill.current.width = width;
+      webcamStill.current.height = height;
+      webcamStillContext.drawImage(webcamVideo.current, 0, 0, width, height);
+    }
   }
 
-  let overlayContent: JSX.Element;
+  let overlayContent: JSX.Element = <></>;
   if (mode === "IDLE") {
     overlayContent = (
       <button
         onClick={start}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-6xl"
+        className="start-button text-black font-bold py-2 px-4 text-4xl"
       >
-        Start!
+        START
       </button>
     );
   } else if (mode === "PHOTO") {
-    overlayContent = <div className="text-white text-6xl">{timer}</div>;
+    overlayContent = (
+      <div className="text-white timer-overlay">{timer === 0 ? "" : timer}</div>
+    );
   }
 
   let mainPanel: JSX.Element;
   if (mode === "LOADING" || mode === "IDLE" || mode === "PHOTO") {
     mainPanel = (
-      <div className="w-full h-screen flex-grow video-container relative">
-        <div className="video-container w-full h-screen absolute">
+      <div
+        className={`w-full flex-grow video-container relative ${
+          timer === 0 ? "flash" : ""
+        }`}
+      >
+        <div className="video-container w-full absolute">
           <video
             width={WEBCAM_WIDTH}
             height={WEBCAM_HEIGHT}
             id="video"
-            className="w-full h-screen"
+            className={`w-full m-auto ${
+              timer === 0 && mode === "PHOTO" ? "hidden" : ""
+            }`}
             ref={webcamVideo}
           >
             Video stream not available.
           </video>
+          <canvas
+            className={`w-full m-auto video-still ${
+              timer === 0 ? "" : "hidden"
+            }`}
+            ref={webcamStill}
+          ></canvas>
         </div>
         <div className="color-green absolute margin-auto w-full h-full grid place-items-center opacity-70 hover:opacity-100">
           {overlayContent}
         </div>
       </div>
     );
-  }
+  } else if (mode === "GENERATE") {
+    const originalImageBase64 =
+      realCanvases[generateModeIndex].current.toDataURL();
 
+    if (aiModeRealMainCanvas.current != null) {
+      aiModeRealMainCanvas.current
+        .getContext("2d")
+        .drawImage(realCanvases[generateModeIndex].current, 0, 0);
+    }
+    const generate = async () => {
+      setShowCandidateImages(true);
+      aiCandidateGenerations.forEach((aiCandidateGeneration) => {
+        aiCandidateGeneration.current.src =
+          "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D";
+      });
+      const generatePayload = {
+        prompt: promptRef.current.value,
+        imageBase64: originalImageBase64,
+      };
+
+      let numRequestsOut = NUM_AI_GENERATIONS;
+      setRequestsPending(NUM_AI_GENERATIONS);
+
+      for (let i = 0; i < NUM_AI_GENERATIONS; i++) {
+        aiCandidateSpinners[i].current.style.display = "block";
+
+        fetch(`/generate_image?generate_index=${generateModeIndex}`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(generatePayload),
+        })
+          .then((response) => response.json())
+          .then((content) => {
+            if (content["generate_index"] != generateModeIndex) {
+              return;
+            }
+            numRequestsOut--;
+            const aiBase64 = `data:image/png;base64,${content["ai_base64"]}`;
+            aiCandidateSpinners[i].current.style.display = "none";
+            aiCandidateGenerations[i].current.src = aiBase64;
+            setRequestsPending(numRequestsOut);
+          });
+
+        // After 20 seconds, just reset requests out to 0 so things don't break.
+        // setTimeout(() => {
+        //   if (i !== generateModeIndex) {
+        //     return;
+        //   }
+        //   setRequestsPending(0);
+        //   aiCandidateSpinners.forEach((aiCandidateSpinner) => {
+        //     aiCandidateSpinner.current.style.display = "none";
+        //   });
+        // }, REQUESTS_TIMEOUT);
+      }
+    };
+
+    const aiImages = aiCandidateGenerations.map((aiCandidateGeneration, i) => {
+      const selectAI = () => {
+        setShowCandidateImages(false);
+
+        const nextGenerateModeIndex = generateModeIndex + 1;
+        aiColumnImages[generateModeIndex].current.src =
+          aiCandidateGeneration.current.src;
+        prompts[generateModeIndex][1](promptRef.current.value);
+        dispatch(setGenerateModeIndex(generateModeIndex + 1));
+        aiCandidateGenerations.forEach((aiCandidateGeneration) => {
+          aiCandidateGeneration.current.src =
+            "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D";
+        });
+        if (nextGenerateModeIndex === NUM_PHOTOS) {
+          dispatch(setMode("PRINT"));
+        }
+        // reset UI.
+        promptRef.current.innerText = "";
+        setRequestsPending(0);
+        aiCandidateSpinners.forEach((aiCandidateSpinner) => {
+          aiCandidateSpinner.current.style.display = "none";
+        });
+      };
+      const imgStyle = {
+        width: realCanvases[generateModeIndex].current.offsetWidth + "px",
+        height: realCanvases[generateModeIndex].current.offsetHeight + "px",
+      };
+      return (
+        <div
+          className="inline-block m-2 ai-candidate relative"
+          onClick={selectAI}
+        >
+          <div
+            className="spinner-container absolute hidden"
+            ref={aiCandidateSpinners[i]}
+          >
+            <div className="flex justify-center items-center">
+              <div
+                className="
+                  spinner-border
+                  animate-spin
+                  inline-block
+                  w-8
+                  h-8
+                  border-4
+                  rounded-full
+                  text-purple-500"
+                role="status"
+              >
+                <span className="visually-hidden"></span>
+              </div>
+            </div>
+          </div>
+          <img
+            src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D"
+            className="ai-candidate-generation"
+            style={imgStyle}
+            ref={aiCandidateGeneration}
+          />
+        </div>
+      );
+    });
+
+    const existingPrompts = PROMPTS.map((prompt) => {
+      const displayPrompt =
+        prompt.length > 100 ? `${prompt.slice(0, 100)}...` : prompt;
+      return <option value={prompt}>{displayPrompt}</option>;
+    });
+    const selectPrompt = (e) => {
+      promptRef.current.innerText = e.target.value;
+      setTimeout(() => generate());
+    };
+    const randomPrompt = () => {
+      promptRef.current.innerText =
+        PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+      setTimeout(() => generate());
+    };
+
+    mainPanel = (
+      <div className="flex flex-col margin-auto content-center h-screen w-full">
+        <div className="flex flex-row justify-center prompt-top-container">
+          <div className="w-96 mr-6">
+            <img
+              id="img"
+              className="original-image-generation"
+              src={originalImageBase64}
+            />
+          </div>
+          <div className="w-96 flex flex-col margin-auto content-center flex-1">
+            <textarea
+              ref={promptRef}
+              id="prompt"
+              className="mb-4 block p-2.5 w-full rounded-lg"
+              placeholder="Type your prompt here."
+              rows={4}
+            ></textarea>
+            <div className="text-left">
+              <button
+                onClick={generate}
+                disabled={requestsPending > 0}
+                id="generate"
+                className="generate-button my-2 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+              >
+                generate
+              </button>
+            </div>
+            <div className="flex flex-row h-12 my-2">
+              <select
+                onChange={selectPrompt}
+                className="prompts-select w-72 px-2 py-2"
+              >
+                <option>Choose from existing prompts!</option>
+                {existingPrompts}
+              </select>
+              <button
+                onClick={randomPrompt}
+                disabled={requestsPending > 0}
+                id="random-prompt"
+                className="generate-button mx-2 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+              >
+                random prompt
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          className={`${
+            showCandidateImages ? "" : "invisible"
+          } w-128 ai-images-grid my-1 py-2 overflow-scroll text-center`}
+        >
+          {aiImages}
+        </div>
+      </div>
+    );
+  } else if (mode === "PRINT") {
+    const printPage = () => {
+      if (collectImagesRef.current.checked) {
+        const aiImagesBase64 = aiColumnImages.map((aiColumnImage) => {
+          const imgElement = aiColumnImage.current;
+          const canvas = document.createElement("canvas");
+          canvas.width = imgElement.width;
+          canvas.height = imgElement.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(imgElement, 0, 0);
+          return canvas.toDataURL();
+        });
+        const realImagesBase64 = realCanvases.map((realCanvas) =>
+          realCanvas.current.toDataURL()
+        );
+
+        const result = [];
+        for (let i = 0; i < NUM_PHOTOS; i++) {
+          result.push({
+            realImage: realImagesBase64[i].slice(
+              "data:image/png;base64,".length
+            ),
+            aiImage: aiImagesBase64[i].slice("data:image/png;base64,".length),
+            prompt: prompts[i],
+          });
+        }
+        fetch(`/save_images`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(result),
+        });
+      }
+      window.print();
+    };
+    const startAgain = () => {
+      window.location.reload();
+    };
+    mainPanel = (
+      <div className="flex flex-col items-center">
+        <div className="text-center">
+          <button
+            onClick={printPage}
+            id="print"
+            className="bg-white hover:bg-gray-100 text-white font-semibold py-6 px-4 border border-gray-400 rounded shadow"
+          >
+            Print!
+          </button>
+          <div className="text-center text-white">
+            <input
+              id="collect-checkbox"
+              type="checkbox"
+              className="mr-2 mt-4"
+              ref={collectImagesRef}
+              checked
+            ></input>
+            Allow us to collect these images for a final collage
+          </div>
+        </div>
+        <button
+          onClick={startAgain}
+          id="restart"
+          className="generate-button mt-16 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+        >
+          Restart
+        </button>
+      </div>
+    );
+  }
   const photoRows = realCanvases.map((_, i) => {
     const realCanvas = realCanvases[i];
-    const aiCanvas = aiCanvases[i];
+    const aiColumnImage = aiColumnImages[i];
     return (
       <>
-        <div className="flex flex-row my-2">
+        <div className="flex flex-row justify-center" key={`container_${i}`}>
           <div
-            className="photo flex justify-center flex-0 overflow-hidden mr-1"
+            className={`${
+              mode === "PHOTO" && i === photoModeIndex ? "photo-selected" : ""
+            }
+            photo flex justify-center flex-0 overflow-hidden mr-1`}
             key={`photo_${i}`}
           >
             <canvas
@@ -146,159 +454,64 @@ export const App = React.memo(function App(): JSX.Element {
             ></canvas>
           </div>
           <div
-            className="photo flex justify-center flex-0 overflow-hidden"
+            className={`${
+              mode === "GENERATE" && i === generateModeIndex
+                ? "photo-selected"
+                : ""
+            }
+             photo flex justify-center flex-0 overflow-hidden`}
             key={`ai_${i}`}
           >
-            <canvas
-              width={WEBCAM_WIDTH}
-              height={WEBCAM_HEIGHT}
-              className="photo-canvas h-full"
-              ref={aiCanvas}
-            ></canvas>
+            <img className="photo-canvas h-full" ref={aiColumnImage} />
           </div>
         </div>
-        <div className="text-caption text-left pl-2 ">
-          in cubism from outer space, trending on artstation, HD
-        </div>
+        <div className="text-caption text-right px-2">{prompts[i][0]}</div>
       </>
     );
   });
 
   const date = new Date().toLocaleString("en-us", {
-    month: "long",
+    month: "numeric",
     day: "numeric",
     year: "numeric",
   });
 
+  let mainMessage = "";
+  if (mode === "LOADING") {
+    mainMessage = "";
+  } else if (mode === "IDLE") {
+    mainMessage = 'Step 1: Click "Start" and take 3 pictures';
+  } else if (mode === "PHOTO") {
+    const remaining = NUM_PHOTOS - photoModeIndex;
+    const photosText = remaining != 1 ? "photos" : "photo";
+    mainMessage = `${NUM_PHOTOS - photoModeIndex} ${photosText} remaining`;
+  } else if (mode === "GENERATE") {
+    mainMessage = `Step 2: Enter a prompt. Select your favorite image.`;
+  } else if (mode === "PRINT") {
+    mainMessage = `Step 3: Print your image! Please select the default printer.`;
+  }
+
   return (
     <>
-      <div className="flex w-full flex-row container">
-        <div className="print-preview flex flex-col flex-initial">
-          {/* <div className="col-preview real-preview h-full flex flex-initial flex-col flex-grow">
-            {realCanvasElements}
+      <div className="flex w-screen flex-row content-container flex-wrap">
+        <div className="print-preview-container flex flex-col flex-initial">
+          <div className="print-preview-description text-4xl">
+            AI Photobooth
           </div>
-          <div className="col-preview ai-preview h-full flex flex-initial flex-col flex-grow">
-            {aiCanvasElements}
-          </div> */}
-          <div className="date text-right text-xs mt-2 mr-2">{date}</div>
-          {photoRows}
+          <div className="print-preview flex flex-col flex-initial">
+            <div className="date text-left text-xs my-1 ml-2">{date}</div>
+            {photoRows}
+          </div>
         </div>
-        <div className="no-print main-panel relative w-full">{mainPanel}</div>
+
+        <div className="no-print main-panel-container relative w-full flex-1">
+          <div className="main-panel-description text-right">{mainMessage}</div>
+          <div className="main-panel relative">{mainPanel}</div>
+        </div>
       </div>
     </>
   );
 });
-
-async function main() {
-  const imgElement = document.getElementById("img") as HTMLImageElement;
-  const generateElement = document.getElementById("generate");
-  const promptElement = document.getElementById(
-    "prompt"
-  ) as HTMLTextAreaElement;
-
-  console.log(generateElement);
-  generateElement?.addEventListener("click", () => {
-    const prompt = promptElement?.value;
-
-    const context = canvas.getContext("2d");
-    canvas.width = width;
-    canvas.height = height;
-    context.drawImage(video, 0, 0, width, height);
-
-    const data = encodeURIComponent(canvas.toDataURL("image/png"));
-    console.log(data);
-
-    imgElement.src = `/generate?prompt=${prompt}&init_img=${data}`;
-  });
-}
-
-// The width and height of the captured photo. We will set the
-// width to the value defined here, but the height will be
-// calculated based on the aspect ratio of the input stream.
-
-const height = 128; // We will scale the photo width to this
-let width = 0; // This will be computed based on the input stream
-
-// |streaming| indicates whether or not we're currently streaming
-// video from the camera. Obviously, we start at false.
-
-let streaming = false;
-
-// The various HTML elements we need to configure or control. These
-// will be set by the startup() function.
-
-let video = null;
-let canvas = null;
-let photo = null;
-let startbutton = null;
-
-function showViewLiveResultButton() {
-  if (window.self !== window.top) {
-    // Ensure that if our document is in a frame, we get the user
-    // to first open it in its own tab or window. Otherwise, it
-    // won't be able to request permission for camera access.
-    document.querySelector(".contentarea").remove();
-    const button = document.createElement("button");
-    button.textContent = "View live result of the example code above";
-    document.body.append(button);
-    button.addEventListener("click", () => window.open(location.href));
-    return true;
-  }
-  return false;
-}
-
-function startup() {
-  if (showViewLiveResultButton()) {
-    return;
-  }
-  video = document.getElementById("video");
-  canvas = document.getElementById("canvas");
-  photo = document.getElementById("photo");
-  startbutton = document.getElementById("startbutton");
-
-  navigator.mediaDevices
-    .getUserMedia({ video: true, audio: false })
-    .then((stream) => {
-      video.srcObject = stream;
-      video.play();
-    })
-    .catch((err) => {
-      console.error(`An error occurred: ${err}`);
-    });
-
-  if (video == 1) {
-    video.addEventListener(
-      "canplay",
-      (ev) => {
-        if (!streaming) {
-          //height = video.videoHeight / (video.videoWidth / width);
-          width = Math.floor(video.videoWidth / (video.videoHeight / height));
-          console.log(video.videoWidth);
-          // Firefox currently has a bug where the height can't be read from
-          // the video, so we will make assumptions if this happens.
-
-          // if (isNaN(height)) {
-          //   height = width / (4 / 3);
-          // }
-
-          video.setAttribute("width", width);
-          video.setAttribute("height", height);
-
-          canvas.setAttribute("width", width);
-          canvas.setAttribute("height", height);
-          streaming = true;
-        }
-      },
-      false
-    );
-  }
-}
-
-// Set up our event listener to run the startup process
-// once loading is complete.
-//window.addEventListener("load", startup, false);
-
-addEventListener("DOMContentLoaded", (event) => main());
 
 window.addEventListener("DOMContentLoaded", () => {
   const root = createRoot(document.getElementById("root") as HTMLDivElement);
@@ -307,6 +520,4 @@ window.addEventListener("DOMContentLoaded", () => {
       <App />
     </Provider>
   );
-
-  //main();
 });

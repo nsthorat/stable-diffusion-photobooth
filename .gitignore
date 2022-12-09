@@ -1,6 +1,7 @@
 node_modules/
 dist/
-
+.venv/
+.out
 yarn-error.log
 
 pyenv/

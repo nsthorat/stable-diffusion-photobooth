@@ -4,19 +4,18 @@
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "alwaysStrict": true,
-    "esModuleInterop": true,
     // To allow const a = require('module');
+    "esModuleInterop": true,
     "outDir": "./dist/",
     "lib": ["es6", "dom", "es2015"],
     "module": "es6",
-    "target": "ES2020",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "declaration": false,
     "jsx": "react",
     "experimentalDecorators": true,
     "allowJs": true,
     "downlevelIteration": true,
-    "typeRoots" : ["./node_modules/@types"],
   },
   "include": [
     "server/web/*"

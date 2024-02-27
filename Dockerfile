@@ -26,4 +26,5 @@ COPY ./server ./server
 # Timeout is set to 0 to disable the timeouts of the workers to allow Cloud Run to handle instance scaling.
 ENV RUN_ON_CLOUD True
 ENV PUBLIC_URL https://aiphotobooth-dour4pltwa-uc.a.run.app
+
 CMD exec gunicorn --bind :$PORT --workers 4 --threads 8 --timeout 0 server.server:app

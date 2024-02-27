@@ -77,17 +77,7 @@ export const WEBPACK_CONFIG: Configuration = {
     new HtmlWebpackPlugin(INDEX_HTML_OPTIONS),
     new WriteFilePlugin(),
     new CopyPlugin({
-      patterns: [
-        { from: "./static", to: "./static" },
-        // Copy Shoelace assets to dist/shoelace
-        {
-          from: path.resolve(
-            __dirname,
-            "node_modules/@shoelace-style/shoelace/dist/assets"
-          ),
-          to: path.resolve(DIST_STATIC_PATH, "shoelace/assets"),
-        },
-      ],
+      patterns: [{ from: "./static", to: "./static" }],
     }),
   ],
   devServer: WEBPACK_DEVSERVER_CONFIG,

@@ -7,3 +7,5 @@ yarn-error.log
 pyenv/
 
 server/__pycache__
+models/
+Collage.ipynb

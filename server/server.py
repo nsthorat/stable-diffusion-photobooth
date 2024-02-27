@@ -19,6 +19,8 @@ from typing import Optional, IO
 
 app = Flask(__name__)
 
+BUCKET_NAME = 'ai-photobooth-images'
+
 # NOTE: If flask stops working and 403s, flush stuff here:
 # chrome://net-internals/#sockets
 
@@ -67,7 +69,7 @@ def save_images():
 
   # Format the date and time as a string
   filename = now.strftime("%Y_%m_%d_%H_%M_%S")
-  filepath = f'gs://ai-photobooth-images/photobooth/{filename}.json'
+  filepath = f'gs://{BUCKET_NAME}/photobooth/{filename}.json'
 
   with open_file(filepath, 'w') as f:
     f.write(json.dumps(data))
@@ -75,22 +77,42 @@ def save_images():
   print('Wrote to ', filepath)
   return {'file': filepath}
 
-@app.route('/main_image')
-def main_image():
-  return send_from_directory('static', 'cat_outerspace.png')
+@app.route("/list_visits", methods=['GET'])
+def list_visits():
+  storage_client = _get_storage_client()
+
+  # Note: Client.list_blobs requires at least package version 1.17.0.
+  blobs = storage_client.list_blobs(BUCKET_NAME)
+
+  return {'visits': [blob.name for blob in blobs if blob.name.endswith('.json')]}
+
+@app.route("/image", methods=['GET'])
+def image():
+  image_type = request.args.get('type')
+  visit = request.args.get('visit')
+
+  with open_file(os.path.join(f'gs://{BUCKET_NAME}', visit)) as f:
+    visit_json = json.loads(f.read())
+
+  image_b64 = visit_json[0][image_type]
+  img_bytes = base64.b64decode(image_b64)
+  buf = io.BytesIO(img_bytes)
+  return send_file(buf, mimetype='image/png')
 
 @app.route('/loading.gif')
 def loading_gif():
   return send_from_directory('../dist/static', 'loading.gif')
 
-@app.route('/')
-def index():
-  return send_from_directory('../dist/', 'index.html')
-
 
 @app.route('/bundle.js')
 def bundle():
   return send_from_directory('../dist/static/', 'bundle.js')
+
+@app.route('/')
+@app.route('/collage')
+def index():
+  return send_from_directory('../dist/', 'index.html')
+
 
 STABILITY_HOST = "grpc.stability.ai:443"
 print(os.environ["STABILITY_KEY"])

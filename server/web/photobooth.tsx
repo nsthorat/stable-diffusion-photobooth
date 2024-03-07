@@ -516,11 +516,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           </div>
 
           <div className="no-print main-panel-container w-full flex flex-row gap-x-8">
-<<<<<<< HEAD
             <div className="main-panel relative grow">{mainPanel}</div>
-=======
-            <div className="main-panel relative grow mt-16">{mainPanel}</div>
->>>>>>> origin/main
 
             <div className="flex flex-col">
               <div className="mt-4">Preview</div>

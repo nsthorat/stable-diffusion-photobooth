@@ -8,9 +8,9 @@ import {
   setTimer,
 } from "./store";
 
-const TIMER_LENGTH = 5;
+const TIMER_LENGTH = 0;
 const NUM_PHOTOS = 3;
-const NUM_AI_GENERATIONS = 8; //9;
+const NUM_AI_GENERATIONS = 9;
 const REQUESTS_TIMEOUT = 20000; // ms
 
 const WEBCAM_WIDTH = 512;
@@ -301,61 +301,61 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     };
 
     mainPanel = (
-      <div className="flex flex-col margin-auto content-center h-screen w-full">
-        <div className="flex flex-row justify-center prompt-top-container">
-          <div className="w-96 mr-6">
+      <div className="flex flex-row margin-auto content-center h-screen w-full">
+        <div className="flex flex-col prompt-top-container gap-y-2">
+          <div className="w-96 mx-auto">
             <img
               id="img"
               className="original-image-generation"
               src={originalImageBase64}
             />
           </div>
-          <div className="w-96 flex flex-col margin-auto content-center flex-1">
-            <textarea
-              ref={promptRef}
-              id="prompt"
-              className="mb-4 block p-2.5 w-full rounded-lg"
-              placeholder="Type your prompt here."
-              rows={4}
-              value={currentPrompt}
-              onChange={(e) => {
-                console.log("onChange");
-                setCurrentPrompt(e.target.value);
-              }}
-            ></textarea>
-            <div className="text-left">
-              <button
-                onClick={(e) => generate(currentPrompt)}
-                disabled={requestsPending > 0}
-                id="generate"
-                className="generate-button my-2 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-              >
-                generate
-              </button>
-            </div>
-            <div className="flex flex-row h-12 my-2">
-              <select
-                onChange={selectPrompt}
-                className="prompts-select w-72 px-2 py-2"
-              >
-                <option>Choose from existing prompts!</option>
-                {existingPrompts}
-              </select>
-              <button
-                onClick={randomPrompt}
-                disabled={requestsPending > 0}
-                id="random-prompt"
-                className="generate-button mx-2 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-              >
-                random prompt
-              </button>
-            </div>
+          <select
+            onChange={selectPrompt}
+            className="prompts-select w-full px-2 py-2 rounded"
+            style={{ letterSpacing: "1px" }}
+          >
+            <option>Choose from existing prompts!</option>
+            {existingPrompts}
+          </select>
+          <button
+            onClick={randomPrompt}
+            disabled={requestsPending > 0}
+            id="random-prompt"
+            style={{ letterSpacing: "1px" }}
+            className="text-black text-left w-full generate-button font-semibold py-2 px-4 rounded shadow"
+          >
+            random prompt
+          </button>
+          <textarea
+            ref={promptRef}
+            id="prompt"
+            className="mb-2 block p-2.5 w-full bg-white"
+            style={{ letterSpacing: "1px" }}
+            placeholder="Type your prompt here..."
+            rows={4}
+            value={currentPrompt}
+            onChange={(e) => {
+              console.log("onChange");
+              setCurrentPrompt(e.target.value);
+            }}
+          ></textarea>
+          <div className="text-left">
+            <button
+              onClick={(e) => generate(currentPrompt)}
+              disabled={requestsPending > 0}
+              id="generate"
+              style={{ letterSpacing: "1px" }}
+              className="generate-button my-2 font-semibold py-2 px-4 text-black rounded shadow"
+            >
+              generate
+            </button>
           </div>
         </div>
         <div
           className={`${
             showCandidateImages ? "" : "invisible"
-          } w-128 ai-images-grid my-1 py-2 overflow-scroll text-center`}
+          } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
         >
           {aiImages}
         </div>
@@ -367,8 +367,8 @@ export const Photobooth = React.memo(function App(): JSX.Element {
         const aiImagesBase64 = aiColumnImages.map((aiColumnImage) => {
           const imgElement = aiColumnImage.current;
           const canvas = document.createElement("canvas");
-          canvas.width = imgElement.width;
-          canvas.height = imgElement.height;
+          canvas.width = imgElement.naturalWidth;
+          canvas.height = imgElement.naturalHeight;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(imgElement, 0, 0);
           return canvas.toDataURL();
@@ -492,20 +492,35 @@ export const Photobooth = React.memo(function App(): JSX.Element {
 
   return (
     <>
-      <div className="flex w-screen flex-row content-container flex-wrap">
-        <div className="print-preview-container flex flex-col flex-initial">
-          <div className="print-preview-description text-4xl">
-            AI Photobooth
+      <div className="flex w-screen flex-row content-container flex-wrap overflow-hidden">
+        <div className="flex flex-col w-full">
+          <div
+            className="print-preview-container flex flex-row flex-initial justify-between px-4 py-2"
+            style={{ backgroundColor: "#262220" }}
+          >
+            <div
+              className="print-preview-description text-4xl flex flex-row items-center gap-x-4"
+              style={{ fontFamily: "Koulen" }}
+            >
+              <img src="/logo.png" style={{ width: "51px" }}></img>
+              AI Photobooth
+            </div>
+            <div className="main-panel-description text-right my-4">
+              {mainMessage}
+            </div>
           </div>
-          <div className="print-preview flex flex-col flex-initial">
-            <div className="date text-left text-xs my-1 ml-2">{date}</div>
-            {photoRows}
-          </div>
-        </div>
 
-        <div className="no-print main-panel-container relative w-full flex-1">
-          <div className="main-panel-description text-right">{mainMessage}</div>
-          <div className="main-panel relative">{mainPanel}</div>
+          <div className="no-print main-panel-container w-full flex flex-row gap-x-8">
+            <div className="main-panel relative grow mt-16">{mainPanel}</div>
+
+            <div className="flex flex-col">
+              <div className="mt-4">Preview</div>
+              <div className="print-preview flex flex-col flex-initial mt-6 mr-12">
+                <div className="date text-left text-xs my-1 ml-2">{date}</div>
+                {photoRows}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>

@@ -144,7 +144,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           timer === 0 ? "flash" : ""
         }`}
       >
-        <div className="video-container w-full absolute">
+        <div className="video-container w-full absolute mt-10">
           <video
             width={WEBCAM_WIDTH}
             height={WEBCAM_HEIGHT}
@@ -352,12 +352,17 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             </button>
           </div>
         </div>
-        <div
-          className={`${
-            showCandidateImages ? "" : "invisible"
-          } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
-        >
-          {aiImages}
+        <div>
+          <div className={`${showCandidateImages ? "" : "invisible"}`}>
+            Choose your favorite image
+          </div>
+          <div
+            className={`${
+              showCandidateImages ? "" : "invisible"
+            } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
+          >
+            {aiImages}
+          </div>
         </div>
       </div>
     );
@@ -511,7 +516,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           </div>
 
           <div className="no-print main-panel-container w-full flex flex-row gap-x-8">
-            <div className="main-panel relative grow mt-16">{mainPanel}</div>
+            <div className="main-panel relative grow">{mainPanel}</div>
 
             <div className="flex flex-col">
               <div className="mt-4">Preview</div>

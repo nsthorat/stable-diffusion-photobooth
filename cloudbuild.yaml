@@ -1,0 +1,21 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      [
+        '-c',
+        'docker pull us-east1-docker.pkg.dev/$PROJECT_ID/aiphotobooth/server:latest || exit 0',
+      ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        'us-east1-docker.pkg.dev/$PROJECT_ID/aiphotobooth/server:latest',
+        '--cache-from',
+        'us-east1-docker.pkg.dev/$PROJECT_ID/aiphotobooth/server:latest',
+        '.',
+      ]
+# Set a 40 minute timeout. In practice builds should be 15 mins, and this gives us breathing room.
+timeout: 2400s
+images: ['us-east1-docker.pkg.dev/$PROJECT_ID/aiphotobooth/server:latest']

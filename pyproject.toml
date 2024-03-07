@@ -4,22 +4,43 @@ version = "0.0.1"
 description = "SD Photobooth"
 authors = ["Nikhil"]
 readme = "README.md"
-packages = [{include = "server"}]
+packages = [{include = "server"}, { include = "modal" }]
 
 [tool.poetry.dependencies]
+gunicorn = "^20.1.0"
+Flask = "^2.2.2"
 python = "~3.9"
+pyOpenSSL = "^22.1.0"
+google-cloud-storage = "^2.5.0"
+python-coreml-stable-diffusion = {git = "https://github.com/apple/ml-stable-diffusion"}
+huggingface-hub = {extras = ["cli"], version = "^0.20.3"}
+ipykernel = "^6.29.3"
+datasets = "^2.17.1"
+matplotlib = "^3.8.3"
+ipyplot = "^1.1.2"
+tqdm = "^4.66.2"
+torch = "^2.2.1"
+torchvision = "^0.17.1"
+keras = "^3.0.5"
+chromadb = "^0.4.23"
+scikit-learn = "^1.4.1.post1"
+modal = "^0.58.88"
+pillow = "^10.2.0"
 
 [tool.poetry.group.dev.dependencies]
-Flask = "^2.2.2"
 mypy = "0.971"
 pylint = "^2.15"
 pytest = "^7.1.3"
 pytest-cov = "^4.0.0"
-stability-sdk = "^0.2.5"
 yapf = "^0.32.0"
 
 [tool.poetry.scripts]
 server = "server:main"
+
+[tool.ruff]
+src = ["garden"]
+line-length = 100
+indent-width = 2
 
 [build-system]
 requires = ["poetry-core"]
@@ -29,7 +50,7 @@ build-backend = "poetry.core.masonry.api"
 line_length = 100
 
 [tool.pyright]
-include = ["server"]
+include = ["server", "modal"]
 exclude = [
   "**/__pycache__",
 ]

@@ -1,0 +1,10 @@
+#!include:.dockerignore
+
+node_modules/
+.venv/
+.out/
+yarn-error.log
+
+pyenv/
+
+server/__pycache__

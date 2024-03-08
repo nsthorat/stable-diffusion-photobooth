@@ -247,8 +247,8 @@ class Collage:
         similarity_images.append(source_slices[image_id][slice_id])
 
       # print(len(similarity_images))
-    target_width, target_height = target_image.size
-    target_size = request.target_size or (
+    target_width, target_height = target_image.size if target_image else request.target_size or (640, 480)
+    target_size = (
       math.floor(target_width * request.upscale_target),
       math.floor(target_height * request.upscale_target),
     )

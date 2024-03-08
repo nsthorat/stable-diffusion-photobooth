@@ -30,7 +30,15 @@ export const Collage = React.memo(function App(): JSX.Element {
     ...(visits.ai_image_paths || []),
     ...(visits.real_image_paths || []),
   ];
-  // console.log("visits=", imagePaths);
+
+  const [targetImages, setTargetImages] = React.useState<string[]>([]);
+  React.useEffect(() => {
+    fetch("/list_target_images")
+      .then((response) => response.json())
+      .then((data) => {
+        setTargetImages(data);
+      });
+  }, []);
 
   const {
     targetSlices,
@@ -39,29 +47,49 @@ export const Collage = React.memo(function App(): JSX.Element {
     prompt,
     upscale,
     diversity,
-  } = useControls({
-    targetSlices: 100,
-    sourceSlices: 4,
-    resnetLayer: "layer4.1.add",
-    upscale: 10.0,
-    diversity: 0.0,
-    prompt: {
-      value:
-        "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
-      rows: true,
+    targetImage,
+  } = useControls(
+    {
+      targetSlices: 100,
+      sourceSlices: 4,
+      resnetLayer: "layer4.1.add",
+      upscale: 10.0,
+      diversity: 0.0,
+      prompt: {
+        value:
+          "Astronaut in a jungle, cold color palette, muted colors, detailed, 8k",
+        rows: true,
+      },
+      targetImage: {
+        options: {
+          prompt: "prompt",
+          // Map target images to the key-value pair of the image path and the image path.
+          ...targetImages.reduce((acc, targetImage) => {
+            acc[targetImage] = targetImage;
+            return acc;
+          }, {}),
+        },
+      },
     },
-  });
+    [targetImages]
+  );
   console.log(prompt);
 
   async function generateCollage() {
     // Make a post request to generate_collage.
 
+    // Make the clientWidth divisible by 8.
+    const targetWidth = Math.floor(document.body.clientWidth / 8) * 8;
+    const targetHeight = Math.floor(document.body.clientHeight / 8) * 8;
     const data = {
       targetSlices,
+      targetWidth,
+      targetHeight,
       sourceSlices,
       resnetLayer,
       imagePaths,
-      prompt,
+      prompt: targetImage === "prompt" ? prompt : undefined,
+      targetImage: targetImage === "prompt" ? undefined : targetImage,
       upscale,
       diversity,
       targetSize: [window.innerWidth, window.innerHeight],

@@ -135,6 +135,16 @@ def list_visits():
 
   return visits
 
+@app.route("/list_target_images", methods=["GET"])
+def list_target_images():
+  client = _get_storage_client()
+  blobs = client.list_blobs('ai-photobooth-images')
+  target_images = [
+    blob.name.removeprefix('collage_targets/') for blob in blobs
+    if blob.name.startswith('collage_targets/') and blob.name.endswith('.png')
+  ]
+
+  return target_images
 
 @app.route("/image", methods=["GET"])
 def image():
@@ -171,17 +181,35 @@ def generate_collage():
 
   # Choose a random id from 1 - 100
   img_id = math.floor(random.random() * 100)
-  target_image = DATASET["test"]["image"][img_id]
+  # target_image = DATASET["test"]["image"][img_id]
   # source_images = [target_image]
   source_images = DATASET["test"]["image"][0:100]
 
   collage = modal.Function.lookup("collage", "Collage.collage")
 
+  if 'prompt' in data:
+    prompt = data['prompt']
+  else:
+    prompt = None
+
+  if 'targetImage' in data:
+    # REad from gcs
+    target_image = data['targetImage']
+    with open_file(f'gs://ai-photobooth-images/collage_targets/{target_image}',  "rb") as f:
+      img_bytes = f.read()
+    target_image = Image.open(io.BytesIO(img_bytes)).convert("RGB")
+  else:
+    target_image = None
+
   with DebugTimer("Collage"):
     collage_response = collage.remote(
       {
-        # "target_image": target_image,
-        "target_prompt": data["prompt"],
+        "target_image": target_image,
+        "target_prompt": prompt,
+        "target_size": [
+          data["targetWidth"] if "targetWidth" in data else None,
+          data["targetHeight"] if "targetHeight" in data else None,
+        ],
         "target_num_slices": data["targetSlices"],
         "upscale_target": float(data["upscale"]),
         # "source_images": source_images,

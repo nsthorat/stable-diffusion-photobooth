@@ -10,7 +10,7 @@ import {
 
 const TIMER_LENGTH = 0;
 const NUM_PHOTOS = 3;
-const NUM_AI_GENERATIONS = 6;
+const NUM_AI_GENERATIONS = 5;
 const REQUESTS_TIMEOUT = 20000; // ms
 
 const WEBCAM_WIDTH = 512;
@@ -125,7 +125,8 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     overlayContent = (
       <button
         onClick={start}
-        className="start-button text-black font-bold py-2 px-4 text-4xl"
+        className="start-button text-black font-bold py-1 px-4 text-2xl h-16"
+        style={{ letterSpacing: "1px" }}
       >
         START
       </button>
@@ -301,62 +302,62 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     };
 
     mainPanel = (
-      <div className="flex flex-row margin-auto content-center h-screen w-full">
-        <div className="flex flex-col prompt-top-container gap-y-2 mt-16">
-          <div className="w-96 mx-auto">
+      <div className="flex flex-col margin-auto content-center h-screen w-full overflow-hidden">
+        <div className="flex flex-row prompt-top-container gap-x-8 w-full">
+          <div className="mx-auto">
             <img
               id="img"
               className="original-image-generation"
               src={originalImageBase64}
             />
           </div>
-          <select
-            onChange={selectPrompt}
-            className="prompts-select w-full px-2 py-2 rounded"
-            style={{ letterSpacing: "1px" }}
-          >
-            <option>Choose from existing prompts!</option>
-            {existingPrompts}
-          </select>
-          <button
-            onClick={randomPrompt}
-            disabled={requestsPending > 0}
-            id="random-prompt"
-            style={{ letterSpacing: "1px" }}
-            className="text-black text-left w-full generate-button font-semibold py-2 px-4 rounded shadow"
-          >
-            random prompt
-          </button>
-          <textarea
-            ref={promptRef}
-            id="prompt"
-            className="mb-2 block p-2.5 w-full bg-white"
-            style={{ letterSpacing: "1px" }}
-            placeholder="Type your prompt here..."
-            rows={4}
-            value={currentPrompt}
-            onChange={(e) => {
-              console.log("onChange");
-              setCurrentPrompt(e.target.value);
-            }}
-          ></textarea>
-          <div className="text-left">
-            <button
-              onClick={(e) => generate(currentPrompt)}
-              disabled={requestsPending > 0}
-              id="generate"
+          <div className="flex flex-col gap-y-2">
+            <select
+              onChange={selectPrompt}
+              className="prompts-select w-full px-2 py-2 rounded"
               style={{ letterSpacing: "1px" }}
-              className="generate-button my-2 font-semibold py-2 px-4 text-black rounded shadow"
             >
-              generate
+              <option>Choose from existing prompts!</option>
+              {existingPrompts}
+            </select>
+            <button
+              onClick={randomPrompt}
+              disabled={requestsPending > 0}
+              id="random-prompt"
+              style={{ letterSpacing: "1px" }}
+              className="text-black text-left w-full generate-button font-semibold py-2 px-4 rounded shadow"
+            >
+              random prompt
             </button>
+            <textarea
+              ref={promptRef}
+              id="prompt"
+              className="mb-2 block p-2.5 w-full bg-white"
+              style={{ letterSpacing: "1px" }}
+              placeholder="Type your prompt here..."
+              rows={4}
+              value={currentPrompt}
+              onChange={(e) => {
+                console.log("onChange");
+                setCurrentPrompt(e.target.value);
+              }}
+            ></textarea>
+            <div className="text-left">
+              <button
+                onClick={(e) => generate(currentPrompt)}
+                disabled={requestsPending > 0}
+                id="generate"
+                style={{ letterSpacing: "1px" }}
+                className="generate-button my-2 font-semibold py-2 px-4 text-black rounded shadow"
+              >
+                generate
+              </button>
+            </div>
           </div>
         </div>
         <div>
           <div
-            className={`${
-              showCandidateImages ? "" : "invisible"
-            } my-2 ml-16 pl-2 mt-4 mb-6`}
+            className={`${showCandidateImages ? "" : "invisible"} pt-4 pb-2`}
           >
             Choose your favorite image
           </div>
@@ -446,7 +447,10 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     const aiColumnImage = aiColumnImages[i];
     return (
       <>
-        <div className="flex flex-row justify-center" key={`container_${i}`}>
+        <div
+          className="flex flex-row justify-center gap-x-4 mx-4"
+          key={`container_${i}`}
+        >
           <div
             className={`${
               mode === "PHOTO" && i === photoModeIndex ? "photo-selected" : ""
@@ -473,16 +477,18 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             <img className="photo-canvas h-full" ref={aiColumnImage} />
           </div>
         </div>
-        <div className="text-caption text-right px-2">{prompts[i][0]}</div>
+        <div className="text-caption px-4 py-1">{prompts[i][0]}</div>
       </>
     );
   });
 
-  const date = new Date().toLocaleString("en-us", {
-    month: "numeric",
-    day: "numeric",
-    year: "numeric",
-  });
+  const date = new Date()
+    .toLocaleString("en-us", {
+      month: "numeric",
+      day: "numeric",
+      year: "2-digit",
+    })
+    .replace(/\//g, ".");
 
   let mainMessage = "";
   if (mode === "LOADING") {
@@ -522,10 +528,19 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           <div className="main-panel-container w-full flex flex-row gap-x-8">
             <div className="no-print main-panel relative grow">{mainPanel}</div>
 
-            <div className="flex flex-col gap-y-6">
-              <div className="mt-4 no-print">Preview</div>
-              <div className="print-preview flex flex-col flex-initial mr-12">
-                <div className="date text-left text-xs my-1 ml-2">{date}</div>
+            <div className="flex flex-col">
+              <div className="mt-4">Preview</div>
+              <div className="print-preview flex flex-col flex-initial mt-6 mr-12">
+                <div className="photo-header text-left text-xs mx-2 flex flex-row justify-between">
+                  <div className="flex flex-row items-center w-full mr-2 py-2 mx-2 mb-2">
+                    <img
+                      src="/logo.png"
+                      style={{ height: "41px", marginLeft: "-2px" }}
+                    ></img>
+                    <div className="text-2xl ml-2 pt-2 grow">AI Photobooth</div>
+                    <div className="justify-self-end pt-4"> {date}</div>
+                  </div>
+                </div>
                 {photoRows}
               </div>
             </div>

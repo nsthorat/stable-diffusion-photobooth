@@ -58,6 +58,7 @@
   }
   .original-image-generation {
     border-radius: 4px;
+    height: 21.5rem;
   }
   .print-preview-description {
     /* text-shadow: 2px 4px 4px black; */
@@ -74,7 +75,8 @@
     background-color: white;
     color: black;
     border: 1px solid black;
-    font-size: 16px;
+    font-size: 12px;
+    font-family: Mandali;
   }
   #prompt:focus-visible {
     border: 1px solid #7f7f7f;
@@ -95,11 +97,13 @@
     color: #eae5e5;
   }
   .generate-button:hover {
-    background-color: grey;
+    background-color: #cacaca;
   }
   .prompts-select {
     background-color: white;
-    border: 1px solid black;
+    outline: 1px solid black;
+    margin-top: 1px;
+    border-right: px solid white;
     color: black;
   }
   @page {
@@ -149,7 +153,7 @@
       margin-left: 18px; */
   }
   .main-panel-container {
-    margin-top: 16px;
+    margin-top: 40px;
     margin-bottom: 8px;
     margin-left: 24px;
     margin-right: 24px;
@@ -170,7 +174,7 @@
     /* margin-top: 24px; */
   }
   .main-panel {
-    margin-top: 4rem;
+    /* margin-top: 4rem; */
   }
   .photo {
     /* width: 190px; */
@@ -197,6 +201,7 @@
     -webkit-box-orient: vertical;
     font-family: Mandali;
     letter-spacing: 0px;
+    line-height: 140%;
   }
   .photo-header {
     color: black;
@@ -242,7 +247,6 @@
 
   .prompt-top-container {
     padding-bottom: 8px;
-    border-bottom: 1px solid #888;
   }
   .ai-candidate:hover {
     cursor: pointer;
@@ -251,7 +255,20 @@
   #print {
     width: 200px;
     margin-top: 90px;
-    background-color: #eb0fc3;
+    background-color: #f9a027;
+    letter-spacing: 2px;
+  }
+  #print:hover {
+    background-color: #fdcf8d;
+  }
+  #restart {
+    width: 200px;
+    background-color: #cacaca;
+    color: black;
+    letter-spacing: 2px;
+  }
+  #restart:hover {
+    background-color: #eae5e5;
   }
   .collage-img {
     width: 128px;
@@ -259,5 +276,5 @@
 </style>
 
 <body>
-  <div id="root" class="h-screen"></div>
+  <div id="root" class="h-screen overflow-hidden"></div>
 </body>

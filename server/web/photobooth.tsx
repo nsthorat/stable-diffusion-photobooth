@@ -145,7 +145,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           timer === 0 ? "flash" : ""
         }`}
       >
-        <div className="video-container w-full absolute mt-16">
+        <div className="video-container w-full absolute">
           <video
             width={WEBCAM_WIDTH}
             height={WEBCAM_HEIGHT}
@@ -274,7 +274,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           </div>
           <img
             src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs%3D"
-            className="ai-candidate-generation"
+            className="ai-candidate-generation rounded"
             style={imgStyle}
             ref={aiCandidateGeneration}
           />
@@ -303,15 +303,18 @@ export const Photobooth = React.memo(function App(): JSX.Element {
 
     mainPanel = (
       <div className="flex flex-col margin-auto content-center h-screen w-full overflow-hidden">
-        <div className="flex flex-row prompt-top-container gap-x-8 w-full">
-          <div className="mx-auto">
+        <div className="flex flex-row justify-between prompt-top-container gap-x-8 w-full">
+          <div className="">
             <img
               id="img"
               className="original-image-generation"
               src={originalImageBase64}
             />
           </div>
-          <div className="flex flex-col gap-y-2">
+          <div
+            className="flex flex-col gap-y-4 mx-auto"
+            style={{ width: "472px" }}
+          >
             <select
               onChange={selectPrompt}
               className="prompts-select w-full px-2 py-2 rounded"
@@ -334,8 +337,8 @@ export const Photobooth = React.memo(function App(): JSX.Element {
               id="prompt"
               className="mb-2 block p-2.5 w-full bg-white"
               style={{ letterSpacing: "1px" }}
-              placeholder="Type your prompt here..."
-              rows={4}
+              placeholder="Or type your prompt here..."
+              rows={8}
               value={currentPrompt}
               onChange={(e) => {
                 console.log("onChange");
@@ -348,7 +351,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
                 disabled={requestsPending > 0}
                 id="generate"
                 style={{ letterSpacing: "1px" }}
-                className="generate-button my-2 font-semibold py-2 px-4 text-black rounded shadow"
+                className="generate-button font-semibold py-2 px-4 text-black rounded shadow"
               >
                 generate
               </button>
@@ -356,17 +359,25 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           </div>
         </div>
         <div>
-          <div
-            className={`${showCandidateImages ? "" : "invisible"} pt-4 pb-2`}
-          >
+          <div className={`${showCandidateImages ? "" : "invisible"} pb-2`}>
             Choose your favorite image
           </div>
           <div
             className={`${
               showCandidateImages ? "" : "invisible"
-            } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
+            } w-128 ai-images-grid overflow-scroll -mt-2 -ml-1`}
           >
-            {aiImages}
+            <div className="flex flex-row items-center">
+              <div>{aiImages}</div>
+              <div className="">
+                <button
+                  className="text-6xl pl-2 text-neutral-400"
+                  onClick={() => setTimeout(() => generate(currentPrompt))}
+                >
+                  ⟳
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -413,15 +424,16 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     };
     mainPanel = (
       <div className="flex flex-col items-center">
+        <div className="text-5xl">WOW, YOU LOOK INCREDIBLE!</div>
         <div className="text-center">
           <button
             onClick={printPage}
             id="print"
-            className="bg-white hover:bg-gray-100 text-black font-semibold py-6 px-4 border border-gray-400 rounded shadow"
+            className="bg-white hover:bg-gray-100 text-black text-3xl font-semibold py-6 px-4  rounded shadow"
           >
-            Print!
+            Print
           </button>
-          <div className="text-center text-black">
+          <div className="text-center text-black hidden">
             <input
               id="collect-checkbox"
               type="checkbox"
@@ -435,7 +447,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
         <button
           onClick={startAgain}
           id="restart"
-          className="generate-button mt-16 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
+          className="generate-button mt-12 font-semibold py-4 px-4 rounded shadow text-xl"
         >
           Restart
         </button>
@@ -477,7 +489,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             <img className="photo-canvas h-full" ref={aiColumnImage} />
           </div>
         </div>
-        <div className="text-caption px-4 py-1">{prompts[i][0]}</div>
+        <div className="text-caption  px-4 py-1">{prompts[i][0]}</div>
       </>
     );
   });
@@ -510,26 +522,27 @@ export const Photobooth = React.memo(function App(): JSX.Element {
       <div className="flex w-screen flex-row content-container flex-wrap overflow-hidden">
         <div className="flex flex-col w-full">
           <div
-            className="no-print flex flex-row flex-initial justify-between px-4 py-2"
+            className="no-print flex flex-row flex-initial justify-between px-4 py-4"
             style={{ backgroundColor: "#262220" }}
           >
             <div
-              className="print-preview-description text-4xl flex flex-row items-center gap-x-4"
+              className="print-preview-description text-4xl flex flex-row items-center gap-x-4 pl-2"
               style={{ fontFamily: "Koulen" }}
             >
               <img src="/logo.png" style={{ width: "51px" }}></img>
               AI Photobooth
             </div>
-            <div className="main-panel-description text-right my-4">
+            <div className="main-panel-description text-right my-4 hidden">
               {mainMessage}
             </div>
           </div>
 
           <div className="main-panel-container w-full flex flex-row gap-x-8">
-            <div className="no-print main-panel relative grow">{mainPanel}</div>
+            <div className="no-print main-panel relative grow mt-6">
+              {mainPanel}
+            </div>
 
             <div className="flex flex-col">
-              <div className="mt-4">Preview</div>
               <div className="print-preview flex flex-col flex-initial mt-6 mr-12">
                 <div className="photo-header text-left text-xs mx-2 flex flex-row justify-between">
                   <div className="flex flex-row items-center w-full mr-2 py-2 mx-2 mb-2">

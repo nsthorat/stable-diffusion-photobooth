@@ -26,7 +26,10 @@ export const Collage = React.memo(function App(): JSX.Element {
     }, 1000);
     return () => clearInterval(interval);
   }, []);
-  const imagePaths = [...visits.ai_image_paths, ...visits.real_image_paths];
+  const imagePaths = [
+    ...(visits.ai_image_paths || []),
+    ...(visits.real_image_paths || []),
+  ];
   // console.log("visits=", imagePaths);
 
   const {

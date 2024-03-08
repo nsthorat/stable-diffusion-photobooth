@@ -423,7 +423,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
       window.location.reload();
     };
     mainPanel = (
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center h-full justify-center">
         <div className="text-5xl">WOW, YOU LOOK INCREDIBLE!</div>
         <div className="text-center">
           <button

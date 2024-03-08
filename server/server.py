@@ -2,7 +2,7 @@ import base64
 import math
 import random
 
-from stability_sdk import client
+# from stability_sdk import client
 import os
 import io
 from urllib import parse
@@ -222,13 +222,13 @@ def index():
   return send_from_directory("../dist/", "index.html")
 
 
-STABILITY_HOST = "grpc.stability.ai:443"
-print(os.environ["STABILITY_KEY"])
-stability_api = client.StabilityInference(
-  key=os.environ["STABILITY_KEY"],
-  # engine=args.engine,
-  verbose=True,
-)
+# STABILITY_HOST = "grpc.stability.ai:443"
+# print(os.environ["STABILITY_KEY"])
+# stability_api = client.StabilityInference(
+#   key=os.environ["STABILITY_KEY"],
+#   # engine=args.engine,
+#   verbose=True,
+# )
 
 
 def generate_image(prompt: str, init_image: PILImageType = None, width=512, height=512):

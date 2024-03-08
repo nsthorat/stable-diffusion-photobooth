@@ -133,7 +133,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     );
   } else if (mode === "PHOTO") {
     overlayContent = (
-      <div className="text-white timer-overlay">{timer === 0 ? "" : timer}</div>
+      <div className="text-black timer-overlay">{timer === 0 ? "" : timer}</div>
     );
   }
 
@@ -417,11 +417,11 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           <button
             onClick={printPage}
             id="print"
-            className="bg-white hover:bg-gray-100 text-white font-semibold py-6 px-4 border border-gray-400 rounded shadow"
+            className="bg-white hover:bg-gray-100 text-black font-semibold py-6 px-4 border border-gray-400 rounded shadow"
           >
             Print!
           </button>
-          <div className="text-center text-white">
+          <div className="text-center text-black">
             <input
               id="collect-checkbox"
               type="checkbox"
@@ -510,7 +510,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
       <div className="flex w-screen flex-row content-container flex-wrap overflow-hidden">
         <div className="flex flex-col w-full">
           <div
-            className="print-preview-container flex flex-row flex-initial justify-between px-4 py-2"
+            className="no-print flex flex-row flex-initial justify-between px-4 py-2"
             style={{ backgroundColor: "#262220" }}
           >
             <div
@@ -525,8 +525,8 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             </div>
           </div>
 
-          <div className="no-print main-panel-container w-full flex flex-row gap-x-8">
-            <div className="main-panel relative grow">{mainPanel}</div>
+          <div className="main-panel-container w-full flex flex-row gap-x-8">
+            <div className="no-print main-panel relative grow">{mainPanel}</div>
 
             <div className="flex flex-col">
               <div className="mt-4">Preview</div>

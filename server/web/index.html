@@ -105,6 +105,7 @@
   @page {
     margin: 0px;
   }
+
   @media print {
     /* .content-container
     .col-preview,
@@ -118,7 +119,7 @@
       height: 200px;
     } */
     .no-print {
-      display: none;
+      display: none !important;
     }
     .print-preview {
       margin-top: 0px !important;
@@ -130,6 +131,15 @@
     .print-preview-container {
       margin-top: 0px !important;
       margin-left: 0px !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .main-panel-container {
+      margin-top: 0px !important;
+      margin-bottom: 0px !important;
+      margin-left: 0px !important;
+      margin-right: 0px !important;
     }
   }
   /* NOTE: The printer is actually ~380px by ~560px

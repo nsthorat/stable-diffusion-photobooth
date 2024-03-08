@@ -10,7 +10,7 @@ import {
 
 const TIMER_LENGTH = 0;
 const NUM_PHOTOS = 3;
-const NUM_AI_GENERATIONS = 9;
+const NUM_AI_GENERATIONS = 6;
 const REQUESTS_TIMEOUT = 20000; // ms
 
 const WEBCAM_WIDTH = 512;
@@ -132,7 +132,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
     );
   } else if (mode === "PHOTO") {
     overlayContent = (
-      <div className="text-white timer-overlay">{timer === 0 ? "" : timer}</div>
+      <div className="text-black timer-overlay">{timer === 0 ? "" : timer}</div>
     );
   }
 
@@ -144,7 +144,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           timer === 0 ? "flash" : ""
         }`}
       >
-        <div className="video-container w-full absolute">
+        <div className="video-container w-full absolute mt-16">
           <video
             width={WEBCAM_WIDTH}
             height={WEBCAM_HEIGHT}
@@ -302,7 +302,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
 
     mainPanel = (
       <div className="flex flex-row margin-auto content-center h-screen w-full">
-        <div className="flex flex-col prompt-top-container gap-y-2">
+        <div className="flex flex-col prompt-top-container gap-y-2 mt-16">
           <div className="w-96 mx-auto">
             <img
               id="img"
@@ -352,12 +352,21 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             </button>
           </div>
         </div>
-        <div
-          className={`${
-            showCandidateImages ? "" : "invisible"
-          } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
-        >
-          {aiImages}
+        <div>
+          <div
+            className={`${
+              showCandidateImages ? "" : "invisible"
+            } my-2 ml-16 pl-2 mt-4 mb-6`}
+          >
+            Choose your favorite image
+          </div>
+          <div
+            className={`${
+              showCandidateImages ? "" : "invisible"
+            } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
+          >
+            {aiImages}
+          </div>
         </div>
       </div>
     );
@@ -407,11 +416,11 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           <button
             onClick={printPage}
             id="print"
-            className="bg-white hover:bg-gray-100 text-white font-semibold py-6 px-4 border border-gray-400 rounded shadow"
+            className="bg-white hover:bg-gray-100 text-black font-semibold py-6 px-4 border border-gray-400 rounded shadow"
           >
             Print!
           </button>
-          <div className="text-center text-white">
+          <div className="text-center text-black">
             <input
               id="collect-checkbox"
               type="checkbox"
@@ -495,7 +504,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
       <div className="flex w-screen flex-row content-container flex-wrap overflow-hidden">
         <div className="flex flex-col w-full">
           <div
-            className="print-preview-container flex flex-row flex-initial justify-between px-4 py-2"
+            className="no-print flex flex-row flex-initial justify-between px-4 py-2"
             style={{ backgroundColor: "#262220" }}
           >
             <div
@@ -510,12 +519,12 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             </div>
           </div>
 
-          <div className="no-print main-panel-container w-full flex flex-row gap-x-8">
-            <div className="main-panel relative grow mt-16">{mainPanel}</div>
+          <div className="main-panel-container w-full flex flex-row gap-x-8">
+            <div className="no-print main-panel relative grow">{mainPanel}</div>
 
-            <div className="flex flex-col">
-              <div className="mt-4">Preview</div>
-              <div className="print-preview flex flex-col flex-initial mt-6 mr-12">
+            <div className="flex flex-col gap-y-6">
+              <div className="mt-4 no-print">Preview</div>
+              <div className="print-preview flex flex-col flex-initial mr-12">
                 <div className="date text-left text-xs my-1 ml-2">{date}</div>
                 {photoRows}
               </div>

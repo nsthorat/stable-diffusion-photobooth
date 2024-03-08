@@ -145,7 +145,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           timer === 0 ? "flash" : ""
         }`}
       >
-        <div className="video-container w-full absolute">
+        <div className="video-container w-full absolute mt-16">
           <video
             width={WEBCAM_WIDTH}
             height={WEBCAM_HEIGHT}
@@ -364,7 +364,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           <div
             className={`${
               showCandidateImages ? "" : "invisible"
-            } w-128 ai-images-grid overflow-scroll -mt-2 -ml-2`}
+            } w-128 ai-images-grid overflow-scroll text-center -mt-2`}
           >
             {aiImages}
           </div>

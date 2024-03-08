@@ -303,27 +303,18 @@ export const Photobooth = React.memo(function App(): JSX.Element {
 
     mainPanel = (
       <div className="flex flex-col margin-auto content-center h-screen w-full overflow-hidden">
-<<<<<<< HEAD
-        <div className="flex flex-row prompt-top-container gap-x-8 w-full">
-          <div className="mx-auto">
-=======
         <div className="flex flex-row justify-between prompt-top-container gap-x-8 w-full">
           <div className="">
->>>>>>> origin/main
             <img
               id="img"
               className="original-image-generation"
               src={originalImageBase64}
             />
           </div>
-<<<<<<< HEAD
-          <div className="flex flex-col gap-y-2">
-=======
           <div
             className="flex flex-col gap-y-4 mx-auto"
             style={{ width: "472px" }}
           >
->>>>>>> origin/main
             <select
               onChange={selectPrompt}
               className="prompts-select w-full px-2 py-2 rounded"
@@ -346,13 +337,8 @@ export const Photobooth = React.memo(function App(): JSX.Element {
               id="prompt"
               className="mb-2 block p-2.5 w-full bg-white"
               style={{ letterSpacing: "1px" }}
-<<<<<<< HEAD
-              placeholder="Type your prompt here..."
-              rows={4}
-=======
               placeholder="Or type your prompt here..."
               rows={8}
->>>>>>> origin/main
               value={currentPrompt}
               onChange={(e) => {
                 console.log("onChange");
@@ -365,11 +351,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
                 disabled={requestsPending > 0}
                 id="generate"
                 style={{ letterSpacing: "1px" }}
-<<<<<<< HEAD
-                className="generate-button my-2 font-semibold py-2 px-4 text-black rounded shadow"
-=======
                 className="generate-button font-semibold py-2 px-4 text-black rounded shadow"
->>>>>>> origin/main
               >
                 generate
               </button>
@@ -377,13 +359,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           </div>
         </div>
         <div>
-<<<<<<< HEAD
-          <div
-            className={`${showCandidateImages ? "" : "invisible"} pt-4 pb-2`}
-          >
-=======
           <div className={`${showCandidateImages ? "" : "invisible"} pb-2`}>
->>>>>>> origin/main
             Choose your favorite image
           </div>
           <div
@@ -513,11 +489,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             <img className="photo-canvas h-full" ref={aiColumnImage} />
           </div>
         </div>
-<<<<<<< HEAD
-        <div className="text-caption px-4 py-1">{prompts[i][0]}</div>
-=======
         <div className="text-caption  px-4 py-1">{prompts[i][0]}</div>
->>>>>>> origin/main
       </>
     );
   });
@@ -571,10 +543,6 @@ export const Photobooth = React.memo(function App(): JSX.Element {
             </div>
 
             <div className="flex flex-col">
-<<<<<<< HEAD
-              <div className="mt-4">Preview</div>
-=======
->>>>>>> origin/main
               <div className="print-preview flex flex-col flex-initial mt-6 mr-12">
                 <div className="photo-header text-left text-xs mx-2 flex flex-row justify-between">
                   <div className="flex flex-row items-center w-full mr-2 py-2 mx-2 mb-2">

@@ -7,7 +7,7 @@ import math
 import os
 import re
 from typing import Optional
-from modal import Image, Stub, method, gpu, Secret
+from modal import Image, Stub, method, gpu, Secret, Function
 import numpy as np
 from pydantic import BaseModel, ConfigDict
 from PIL import Image as PILImage
@@ -149,9 +149,12 @@ class Collage:
 
     if request.target_prompt:
       with DebugTimer("Generating target image"):
-        target_image = self.generate_image_pipeline(
-          request.target_prompt, num_inference_steps=25
-        ).images[0]
+        target_width, target_height = request.target_size or (640, 480)
+        generate_image = Function.lookup("sd_generate", "Model.inference")
+        target_image = generate_image.remote(
+          request.target_prompt, width=target_width, height=target_height, num_inference_steps=25
+        )
+        target_image = PILImage.open(io.BytesIO(target_image))
     elif request.target_image:
       target_image = request.target_image
     else:
@@ -246,8 +249,8 @@ class Collage:
       # print(len(similarity_images))
     target_width, target_height = target_image.size
     target_size = request.target_size or (
-      math.floor(target_height * request.upscale_target),
       math.floor(target_width * request.upscale_target),
+      math.floor(target_height * request.upscale_target),
     )
     with DebugTimer(f"Stitching collage to {target_size}"):
       stitched_output = stitch_slices(similarity_images, target_size)

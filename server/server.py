@@ -238,6 +238,10 @@ def loading_gif():
 def logo():
   return send_from_directory("../dist/static", "logo.png")
 
+@app.route("/refresh.png")
+def refresh():
+  return send_from_directory("../dist/static", "refresh.png")
+
 
 @app.route("/bundle.js")
 def bundle():

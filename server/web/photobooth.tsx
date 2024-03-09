@@ -317,10 +317,10 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           >
             <select
               onChange={selectPrompt}
-              className="prompts-select w-full px-2 py-2 rounded"
+              className="prompts-select w-full px-2 py-2 rounded border-r-8 border-white"
               style={{ letterSpacing: "1px" }}
             >
-              <option>Choose from existing prompts!</option>
+              <option>Choose from our prompts!</option>
               {existingPrompts}
             </select>
             <button
@@ -330,7 +330,7 @@ export const Photobooth = React.memo(function App(): JSX.Element {
               style={{ letterSpacing: "1px" }}
               className="text-black text-left w-full generate-button font-semibold py-2 px-4 rounded shadow"
             >
-              random prompt
+              generate random prompt
             </button>
             <textarea
               ref={promptRef}
@@ -359,7 +359,9 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           </div>
         </div>
         <div>
-          <div className={`${showCandidateImages ? "" : "invisible"} pb-2`}>
+          <div
+            className={`${showCandidateImages ? "" : "invisible"} pb-2 text-xl`}
+          >
             Choose your favorite image
           </div>
           <div
@@ -374,7 +376,10 @@ export const Photobooth = React.memo(function App(): JSX.Element {
                   className="text-6xl pl-2 text-neutral-400"
                   onClick={() => setTimeout(() => generate(currentPrompt))}
                 >
-                  ⟳
+                  <img
+                    className="opacity-50 hover:opacity-70"
+                    src="/refresh.png"
+                  ></img>
                 </button>
               </div>
             </div>

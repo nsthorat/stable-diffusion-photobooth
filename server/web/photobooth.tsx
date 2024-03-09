@@ -371,13 +371,13 @@ export const Photobooth = React.memo(function App(): JSX.Element {
           >
             <div className="flex flex-row items-center">
               <div>{aiImages}</div>
-              <div className="">
+              <div className="relative">
                 <button
                   className="text-6xl pl-2 text-neutral-400"
                   onClick={() => setTimeout(() => generate(currentPrompt))}
                 >
                   <img
-                    className="opacity-50 hover:opacity-70"
+                    className="opacity-80 hover:opacity-100 w-8"
                     src="/refresh.png"
                   ></img>
                 </button>

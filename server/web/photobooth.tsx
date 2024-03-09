@@ -8,7 +8,7 @@ import {
   setTimer,
 } from "./store";
 
-const TIMER_LENGTH = 0;
+const TIMER_LENGTH = 5;
 const NUM_PHOTOS = 3;
 const NUM_AI_GENERATIONS = 5;
 const REQUESTS_TIMEOUT = 20000; // ms
